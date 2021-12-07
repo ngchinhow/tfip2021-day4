@@ -33,6 +33,8 @@ public class Server {
             InputStream is = this.getSocket().getInputStream();
             OutputStream os = this.getSocket().getOutputStream()
         ) {
+            System.out.println("Successful connection made!");
+            this.writeToClient(os, "Successful connection made!");
             while (!operation.equals("close")) {
                 operation = readFromClient(is);
                 switch (operation) {

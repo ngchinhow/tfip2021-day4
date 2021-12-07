@@ -27,6 +27,7 @@ public class Client {
             OutputStream os = this.getSocket().getOutputStream();
             Scanner scan = new Scanner(System.in)
         ) {
+            System.out.println(this.readFromServer(is));
             while (!operation.equals("close")) {
                 operation = scan.nextLine().toLowerCase();
                 this.writeToServer(os, operation);
