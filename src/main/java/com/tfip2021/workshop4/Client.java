@@ -37,11 +37,11 @@ public class Client {
             this.writeToServer(os, "Hi! My name is " + this.getName());
             System.out.println(this.readFromServer(is));
             while (!operation.equals("close")) {
-                try {
-                    while (!br.ready()) Thread.sleep(200);
-                } catch (InterruptedException e) {
-                    System.out.println("Client/User interface terminated");
-                }
+                // try {
+                //     while (!br.ready()) Thread.sleep(200);
+                // } catch (InterruptedException e) {
+                //     System.out.println("Client/User interface terminated");
+                // }
                 operation = br.readLine().toLowerCase();
                 this.writeToServer(os, operation);
                 String cookieText = this.readFromServer(is);
