@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.net.SocketException;
 
 public class ClientHandler implements Runnable {
     private Socket socket;
@@ -55,9 +56,18 @@ public class ClientHandler implements Runnable {
                 System.out.println(response);
                 this.writeToClient(os, response);
             }
+        } catch (SocketException e) {
+            System.out.println("Socket has been closed!");
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void stop() throws IOException {
+        this.getSocket().close();
+        // this.getSocket().getOutputStream().close();
+        System.out.println("Interrupting thread");
+        // Thread.currentThread().interrupt();
     }
 
     public String readFromClient(InputStream is) throws IOException {

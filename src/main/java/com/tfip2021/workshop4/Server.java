@@ -4,30 +4,33 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 public class Server {
     private ServerSocket server;
     private Socket socket;
     private String fileName;
     private ExecutorService threadPool = Executors.newFixedThreadPool(3);
-    private ClientHandler ch;
+    private ArrayList< ClientHandler > clientThreads = new ArrayList< ClientHandler >();
 
     public ServerSocket getServer() { return this.server; }
     public Socket getSocket() { return this.socket; }
     public String getFileName() { return this.fileName; }
     public ExecutorService getThreadPool() { return this.threadPool; }
-    public ClientHandler getClientHandler() {
-        return this.ch;
-    }
+    public ArrayList< ClientHandler > getClientThreads() { return this.clientThreads; }
 
     public void setSocket(Socket socket) {
         this.socket = socket;
     }
-    public void setClientHandler(ClientHandler worker) {
-        this.ch = worker;
+    public void setClientThread(ClientHandler thread) {
+        this.clientThreads.add(thread);
     }
 
     public Server(int port, String name) throws IOException {
@@ -42,17 +45,19 @@ public class Server {
                 System.out.println("Waiting for new connection...");
                 setSocket(this.getServer().accept());
                 System.out.println("Got socket");
-                setClientHandler(
-                    new ClientHandler(
-                        this.getSocket(),
-                        this.getFileName()
-                    )
+                ClientHandler ch = new ClientHandler(
+                    this.getSocket(),
+                    this.getFileName()
                 );
-                System.out.println("Created worker");
-                this.getThreadPool().submit(getClientHandler());
-                System.out.println("Submitted worker");
+                setClientThread(ch);
+                System.out.println("Created thread");
+                this.getThreadPool().submit(ch);
+                System.out.println("Started thread");
             }
         } catch (SocketTimeoutException e) {
+            for (ClientHandler t : this.getClientThreads()) {
+                t.stop();
+            }
             this.close();
         }
     }
