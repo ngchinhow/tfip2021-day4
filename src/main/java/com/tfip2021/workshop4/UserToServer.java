@@ -10,7 +10,7 @@ import java.io.InterruptedIOException;
 import java.io.OutputStream;
 
 public class UserToServer implements Runnable {
-    private InputStream input; // from PipedInputStream
+    private InputStream input; // from FastPipedInputStream
     private OutputStream output; // from Socket.getOutputStream
     
     public InputStream getInputStream() { return this.input; }

@@ -21,14 +21,14 @@ public class Client {
     private UserToServer uts;
     // Used to store the UserToServer Runnable
     private ExecutorService threadPool = Executors.newFixedThreadPool(1);
-    private PipedOutputStream stagingPipe = new PipedOutputStream();
-    private PipedInputStream releasingPipe = new PipedInputStream(stagingPipe);
+    private FastPipedOutputStream stagingPipe = new FastPipedOutputStream();
+    private FastPipedInputStream releasingPipe = new FastPipedInputStream(stagingPipe);
 
     public Socket getSocket() { return this.socket; }
     public String getName() { return this.name; }
     public UserToServer getUserToServer() { return this.uts; }
     public ExecutorService getThreadPool() { return this.threadPool; }
-    public PipedOutputStream getStagingPipe() { return this.stagingPipe; }
+    public FastPipedOutputStream getStagingPipe() { return this.stagingPipe; }
     public InputStream getReleasingPipe() { return this.releasingPipe; }
 
     public void setUserToServer(UserToServer uts) {

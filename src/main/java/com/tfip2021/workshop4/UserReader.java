@@ -1,14 +1,13 @@
 package com.tfip2021.workshop4;
 
 import java.io.IOException;
-import java.io.PipedOutputStream;
 
 public class UserReader implements Runnable {
-    private PipedOutputStream pos;
+    private FastPipedOutputStream pos;
 
-    public PipedOutputStream getPipedInput() { return this.pos; }
+    public FastPipedOutputStream getPipedInput() { return this.pos; }
 
-    public UserReader(PipedOutputStream pos) {
+    public UserReader(FastPipedOutputStream pos) {
         this.pos = pos;
     } 
 
