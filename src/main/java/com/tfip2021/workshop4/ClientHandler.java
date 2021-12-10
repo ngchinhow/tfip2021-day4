@@ -64,6 +64,9 @@ public class ClientHandler implements Runnable {
     }
 
     public void stop() throws IOException {
+        try (OutputStream os = this.getSocket().getOutputStream()) {
+            this.writeToClient(os, "kill yourself");
+        }
         this.getSocket().close();
         // this.getSocket().getOutputStream().close();
         System.out.println("Interrupting thread");

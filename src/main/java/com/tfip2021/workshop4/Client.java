@@ -2,22 +2,31 @@ package com.tfip2021.workshop4;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class Client {
     private Socket socket;
     private String name;
+    private UserHandler uh;
+    private ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
     public Socket getSocket() { return this.socket; }
     public String getName() { return this.name; }
+    public UserHandler getUserHandler() { return this.uh; }
+    public ExecutorService getThreadPool() { return this.threadPool; }
+
+    public void setUserHandler(UserHandler uh) {
+        this.uh = uh;
+    }
 
     public Client(String add, int port, String name) throws UnknownHostException, IOException {
         this.socket = new Socket(add, port);
@@ -26,29 +35,50 @@ public class Client {
 
     public void interfaceWithUser() throws IOException {
         String operation = "";
+        
         try (
             InputStream is = this.getSocket().getInputStream();
-            OutputStream os = this.getSocket().getOutputStream();
-            BufferedReader br = new BufferedReader(
-                new InputStreamReader(System.in)
-            )
+            OutputStream os = this.getSocket().getOutputStream()
         ) {
             System.out.println("Hi I'm here!");
             this.writeToServer(os, "Hi! My name is " + this.getName());
             System.out.println(this.readFromServer(is));
+            setUserHandler(new UserHandler(is, os));
+            this.getThreadPool().submit(this.getUserHandler());
             while (!operation.equals("close")) {
-                // try {
-                //     while (!br.ready()) Thread.sleep(200);
-                // } catch (InterruptedException e) {
-                //     System.out.println("Client/User interface terminated");
-                // }
-                operation = br.readLine().toLowerCase();
-                this.writeToServer(os, operation);
-                String cookieText = this.readFromServer(is);
-                System.out.println(cookieText.replaceAll("^cookie-text ", ""));
+                System.out.println("Reading from server");
+                String serverText = this.readFromServer(is);
+                if (serverText.equals("kill yourself")) {
+                    operation = "close";
+                    this.getUserHandler().stop();
+                } else {
+                    System.out.println(
+                        serverText.replaceAll("^cookie-text ", "")
+                    );
+                }
             }
         }
+        System.out.println("Closing resources");
         this.close();
+    }
+
+    public void close() throws IOException {
+        this.getThreadPool().shutdown();
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!this.getThreadPool().awaitTermination(10, TimeUnit.SECONDS)) {
+                this.getThreadPool().shutdownNow(); // Cancel currently executing tasks
+                // Wait a while for tasks to respond to being cancelled
+                if (!this.getThreadPool().awaitTermination(10, TimeUnit.SECONDS))
+                    System.err.println("Pool did not terminate");
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            this.getThreadPool().shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
+        }
+        this.getSocket().close();
     }
 
     public String readFromServer(InputStream is) throws IOException {
@@ -62,10 +92,6 @@ public class Client {
         DataOutputStream dos = new DataOutputStream(bos);
         dos.writeUTF(request);
         dos.flush();
-    }
-
-    public void close() throws IOException {
-        this.getSocket().close();
     }
 
     public static void main(String[] args) throws UnknownHostException, IOException {

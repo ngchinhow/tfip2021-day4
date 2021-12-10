@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="com.tfip2021.workshop4.CookieTest" time="0.056" tests="1" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="com.tfip2021.workshop4.CookieTest" time="0.045" tests="1" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="17"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -15,7 +15,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="C:\Progra~1\Java\jdk-17.0.1\bin"/>
-    <property name="sun.java.command" value="C:\Users\CH\AppData\Local\Temp\surefire9634091450382162488\surefirebooter13916307187677525659.jar C:\Users\CH\AppData\Local\Temp\surefire9634091450382162488 2021-12-09T15-13-10_913-jvmRun1 surefire16429085265759502486tmp surefire_08224485480620644297tmp"/>
+    <property name="sun.java.command" value="C:\Users\CH\AppData\Local\Temp\surefire7356913897485887848\surefirebooter3326806074014486857.jar C:\Users\CH\AppData\Local\Temp\surefire7356913897485887848 2021-12-10T12-33-31_970-jvmRun1 surefire2685445813943487748tmp surefire_011750901859408127995tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="C:\Users\CH\OneDrive\TFIP Software Engineering\NUS\Module 1\workshop4\target\test-classes;C:\Users\CH\OneDrive\TFIP Software Engineering\NUS\Module 1\workshop4\target\classes;C:\Users\CH\.m2\repository\junit\junit\4.11\junit-4.11.jar;C:\Users\CH\.m2\repository\org\hamcrest\hamcrest-core\1.3\hamcrest-core-1.3.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -30,7 +30,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\CH\AppData\Local\Temp\surefire9634091450382162488\surefirebooter13916307187677525659.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\CH\AppData\Local\Temp\surefire7356913897485887848\surefirebooter3326806074014486857.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="17.0.1+12-LTS-39"/>
@@ -56,5 +56,5 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="61.0"/>
   </properties>
-  <testcase name="testGetCookie" classname="com.tfip2021.workshop4.CookieTest" time="0.016"/>
+  <testcase name="testGetCookie" classname="com.tfip2021.workshop4.CookieTest" time="0.018"/>
 </testsuite>
