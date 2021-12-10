@@ -1,0 +1,8 @@
+1. Create a file users.txt with the following format. Initially blank
+    <username>/<password>
+2. When the first user tries to get cookie, display the following:
+    "You are not registered. Please choose a username and password e.g. abc/123"
+Server saves the username/password in users.txt
+3. When the user logs in, set some variable isLogin to true.
+4. When the next get-cookie command is >30 seconds later than the previous one,
+isLogin becomes false. Server displays "Please log in again".

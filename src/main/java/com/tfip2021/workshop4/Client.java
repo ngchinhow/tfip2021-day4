@@ -7,6 +7,8 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.concurrent.ExecutorService;
@@ -16,16 +18,21 @@ import java.util.concurrent.TimeUnit;
 public class Client {
     private Socket socket;
     private String name;
-    private UserHandler uh;
+    private UserToServer uts;
+    // Used to store the UserToServer Runnable
     private ExecutorService threadPool = Executors.newFixedThreadPool(1);
+    private PipedOutputStream stagingPipe = new PipedOutputStream();
+    private PipedInputStream releasingPipe = new PipedInputStream(stagingPipe);
 
     public Socket getSocket() { return this.socket; }
     public String getName() { return this.name; }
-    public UserHandler getUserHandler() { return this.uh; }
+    public UserToServer getUserToServer() { return this.uts; }
     public ExecutorService getThreadPool() { return this.threadPool; }
+    public PipedOutputStream getStagingPipe() { return this.stagingPipe; }
+    public InputStream getReleasingPipe() { return this.releasingPipe; }
 
-    public void setUserHandler(UserHandler uh) {
-        this.uh = uh;
+    public void setUserToServer(UserToServer uts) {
+        this.uts = uts;
     }
 
     public Client(String add, int port, String name) throws UnknownHostException, IOException {
@@ -35,7 +42,6 @@ public class Client {
 
     public void interfaceWithUser() throws IOException {
         String operation = "";
-        
         try (
             InputStream is = this.getSocket().getInputStream();
             OutputStream os = this.getSocket().getOutputStream()
@@ -43,14 +49,20 @@ public class Client {
             System.out.println("Hi I'm here!");
             this.writeToServer(os, "Hi! My name is " + this.getName());
             System.out.println(this.readFromServer(is));
-            setUserHandler(new UserHandler(is, os));
-            this.getThreadPool().submit(this.getUserHandler());
+
+            Thread stagingThread = new Thread(
+                new UserReader(this.getStagingPipe())
+            );
+            stagingThread.setDaemon(true);
+            stagingThread.start();
+            setUserToServer(new UserToServer(this.getReleasingPipe(), os));
+            this.getThreadPool().submit(this.getUserToServer());
             while (!operation.equals("close")) {
                 System.out.println("Reading from server");
                 String serverText = this.readFromServer(is);
                 if (serverText.equals("kill yourself")) {
                     operation = "close";
-                    this.getUserHandler().stop();
+                    this.getUserToServer().stop();
                 } else {
                     System.out.println(
                         serverText.replaceAll("^cookie-text ", "")

@@ -3,6 +3,10 @@ ConsoleInput.*
 ConsoleInputTest.*
 ConsoleInputReadTask.*
 
+# Extended Classes of Piped(In|Out)putStream
+FastPipedOutputStream.*
+FastPipedInputStream.*
+
 # Compiled class file
 *.class
 

@@ -4,6 +4,7 @@
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
+
         {
             "type": "java",
             "name": "Launch Current File",
@@ -15,7 +16,8 @@
             "name": "Launch Client",
             "request": "launch",
             "mainClass": "com.tfip2021.workshop4.Client",
-            "projectName": "workshop4"
+            "projectName": "workshop4",
+            "args": "localhost:12345 Client A"
         },
         {
             "type": "java",
@@ -30,7 +32,8 @@
             "name": "Launch Server",
             "request": "launch",
             "mainClass": "com.tfip2021.workshop4.Server",
-            "projectName": "workshop4"
+            "projectName": "workshop4",
+            "args": "12345 cookie_file.txt"
         }
     ]
 }
