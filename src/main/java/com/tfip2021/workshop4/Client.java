@@ -1,38 +1,26 @@
 package com.tfip2021.workshop4;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.PipedInputStream;
-import java.io.PipedOutputStream;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 
-public class Client {
+public class Client extends Handler {
     private Socket socket;
     private String name;
-    private UserToServer uts;
-    // Used to store the UserToServer Runnable
-    private ExecutorService threadPool = Executors.newFixedThreadPool(1);
+    private Thread userHandler;
     private FastPipedOutputStream stagingPipe = new FastPipedOutputStream();
     private FastPipedInputStream releasingPipe = new FastPipedInputStream(stagingPipe);
 
     public Socket getSocket() { return this.socket; }
     public String getName() { return this.name; }
-    public UserToServer getUserToServer() { return this.uts; }
-    public ExecutorService getThreadPool() { return this.threadPool; }
+    public Thread getUserHandler() { return this.userHandler; }
     public FastPipedOutputStream getStagingPipe() { return this.stagingPipe; }
     public InputStream getReleasingPipe() { return this.releasingPipe; }
 
-    public void setUserToServer(UserToServer uts) {
-        this.uts = uts;
+    public void setUserHandler(Thread userHandler) {
+        this.userHandler = userHandler;
     }
 
     public Client(String add, int port, String name) throws UnknownHostException, IOException {
@@ -46,64 +34,42 @@ public class Client {
             InputStream is = this.getSocket().getInputStream();
             OutputStream os = this.getSocket().getOutputStream()
         ) {
-            System.out.println("Hi I'm here!");
-            this.writeToServer(os, "Hi! My name is " + this.getName());
-            System.out.println(this.readFromServer(is));
+            // Handshake with server
+            this.write(os, "Hi! My name is " + this.getName());
+            System.out.println(this.read(is));
 
             Thread stagingThread = new Thread(
                 new UserReader(this.getStagingPipe())
             );
             stagingThread.setDaemon(true);
             stagingThread.start();
-            setUserToServer(new UserToServer(this.getReleasingPipe(), os));
-            this.getThreadPool().submit(this.getUserToServer());
+            setUserHandler(new Thread(
+                new UserHandler(this.getReleasingPipe(), os)
+            ));
+            this.getUserHandler().start();
             while (!operation.equals("close")) {
-                System.out.println("Reading from server");
-                String serverText = this.readFromServer(is);
-                if (serverText.equals("kill yourself")) {
-                    operation = "close";
-                    this.getUserToServer().stop();
-                } else {
-                    System.out.println(
-                        serverText.replaceAll("^cookie-text ", "")
-                    );
+                // Reading from server
+                String serverText = this.read(is);
+                switch (serverText) {
+                    case "kill yourself":
+                        operation = "close";
+                        this.getStagingPipe().close();
+                        this.getReleasingPipe().close();
+                        this.getUserHandler().interrupt();
+                        break;
+                    case "Shutting down...":
+                        operation = "close";
+                    default:
+                        System.out.println(
+                            serverText.replaceAll("^cookie-text ", "")
+                        );
+                        break;
                 }
             }
+        } finally {
+            // Closing resources
+            this.getSocket().close();
         }
-        System.out.println("Closing resources");
-        this.close();
-    }
-
-    public void close() throws IOException {
-        this.getThreadPool().shutdown();
-        try {
-            // Wait a while for existing tasks to terminate
-            if (!this.getThreadPool().awaitTermination(10, TimeUnit.SECONDS)) {
-                this.getThreadPool().shutdownNow(); // Cancel currently executing tasks
-                // Wait a while for tasks to respond to being cancelled
-                if (!this.getThreadPool().awaitTermination(10, TimeUnit.SECONDS))
-                    System.err.println("Pool did not terminate");
-            }
-        } catch (InterruptedException ie) {
-            // (Re-)Cancel if current thread also interrupted
-            this.getThreadPool().shutdownNow();
-            // Preserve interrupt status
-            Thread.currentThread().interrupt();
-        }
-        this.getSocket().close();
-    }
-
-    public String readFromServer(InputStream is) throws IOException {
-        BufferedInputStream bis = new BufferedInputStream(is);
-        DataInputStream dis = new DataInputStream(bis);
-        return dis.readUTF();
-    }
-
-    public void writeToServer(OutputStream os, String request) throws IOException {
-        BufferedOutputStream bos = new BufferedOutputStream(os);
-        DataOutputStream dos = new DataOutputStream(bos);
-        dos.writeUTF(request);
-        dos.flush();
     }
 
     public static void main(String[] args) throws UnknownHostException, IOException {

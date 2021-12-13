@@ -1,5 +1,11 @@
 package com.tfip2021.workshop4;
 
+/*
+Daemon thread used to read from System.in without closing it when
+the program finishes. Implemented for any user interactions with
+console
+*/
+
 import java.io.IOException;
 
 public class UserReader implements Runnable {

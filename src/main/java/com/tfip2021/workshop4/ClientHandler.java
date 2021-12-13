@@ -1,16 +1,12 @@
 package com.tfip2021.workshop4;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketException;
 
-public class ClientHandler implements Runnable {
+public class ClientHandler extends Handler implements Runnable {
     private Socket socket;
     private String fileName;
     
@@ -36,12 +32,12 @@ public class ClientHandler implements Runnable {
             OutputStream os = this.getSocket().getOutputStream()
         ) {
             System.out.println("Reading from Client");
-            String initialMessage = this.readFromClient(is);
+            String initialMessage = this.read(is);
             System.out.println(initialMessage);
             System.out.println("Successful connection made!");
-            this.writeToClient(os, "Successful connection made!");
+            this.write(os, "Successful connection made!");
             while (!operation.equals("close")) {
-                operation = readFromClient(is);
+                operation = read(is);
                 switch (operation) {
                     case "get-cookie":
                         response = "cookie-text " + cookie.getCookie();
@@ -54,7 +50,7 @@ public class ClientHandler implements Runnable {
                         break;
                 }
                 System.out.println(response);
-                this.writeToClient(os, response);
+                this.write(os, response);
             }
         } catch (SocketException e) {
             System.out.println("Socket has been closed!");
@@ -63,26 +59,15 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    public void stop() throws IOException {
+    public void stop() {
         try (OutputStream os = this.getSocket().getOutputStream()) {
-            this.writeToClient(os, "kill yourself");
+            this.write(os, "kill yourself");
+            this.getSocket().close();
+        } catch (SocketException e) {
+            // Socket already closed, possibly by client
+            return;
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        this.getSocket().close();
-        // this.getSocket().getOutputStream().close();
-        System.out.println("Interrupting thread");
-        // Thread.currentThread().interrupt();
-    }
-
-    public String readFromClient(InputStream is) throws IOException {
-        BufferedInputStream bis = new BufferedInputStream(is);
-        DataInputStream dis = new DataInputStream(bis);
-        return dis.readUTF();
-    }
-
-    public void writeToClient(OutputStream os, String request) throws IOException {
-        BufferedOutputStream bos = new BufferedOutputStream(os);
-        DataOutputStream dos = new DataOutputStream(bos);
-        dos.writeUTF(request);
-        dos.flush();
     }
 }

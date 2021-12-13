@@ -1,5 +1,11 @@
 package com.tfip2021.workshop4;
 
+/*
+Rewritten classes of standard Java library to implement shorter
+polling times between reads from InputStream and writes to
+OutputStream
+*/
+
 import java.io.IOException;
 import java.io.PipedOutputStream;
 
